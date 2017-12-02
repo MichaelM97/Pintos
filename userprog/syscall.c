@@ -21,7 +21,7 @@ syscall_handler (struct intr_frame *f UNUSED)
   uint32_t *p = f->esp;
 
   //Declare variables
-  int status;
+  //int status;
 
   //Switch statement for handling system calls
   switch(*p) {
@@ -31,7 +31,16 @@ syscall_handler (struct intr_frame *f UNUSED)
       printf("System HALT has been called!\n");
       shutdown_power_off();
       break;
-}
+    }
+
+    // Case for System Exit called
+    case SYS_EXIT:
+      printf("System EXIT has been called!\n");
+      struct thread *current = thread_current();
+      int status = (f->esp + 8);
+      current->process_info->exit_status = status;
+      thread_exit();
+      break;
 
   }
 }
