@@ -226,13 +226,14 @@ load (const char *file_name, void (**eip) (void), void **esp)
   int i;
 
   /* Extract Arguments */
-  // Create a copy of FILE_NAME and modify it, char file_name_copy[100];
+  // Create a copy of FILE_NAME and modify it
+  char file_name_copy[100];
   strlcpy(file_name_copy, file_name, 100);
   char *argv[255];
   int argc;
   char *save_ptr;
 
-  argv[0] = strtok_r(cmd_string, " ", &save_ptr);
+  argv[0] = strtok_r(file_name_copy, " ", &save_ptr);
   char *token;
   argc = 1;
   while((token = strtok_r(NULL, " ", &save_ptr))!=NULL)
@@ -465,8 +466,8 @@ setup_stack (void **esp, char **argv, int argc)
       if (success) {
         *esp = PHYS_BASE - 12;
         int i = argc;
-        /* This array holds reference to different arguments in the stack
-        uint32_t * arr[argc]; */
+        // This array holds reference to different arguments in the stack
+        uint32_t * arr[argc];
         while(--i >= 0)
         {
           *esp = *esp - (strlen(argv[i])+1)*sizeof(char);
