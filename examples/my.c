@@ -4,7 +4,9 @@
 int
 main (void)
 {
-    printf("Hello, World\n");
+    //printf("Running my.c to test SYS_HALT\n");
+
+	halt();
     
     return EXIT_SUCCESS;
 }

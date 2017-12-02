@@ -3,6 +3,7 @@
 #include <syscall-nr.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
+#include "threads/init.h"
 
 static void syscall_handler (struct intr_frame *);
 
@@ -19,15 +20,18 @@ syscall_handler (struct intr_frame *f UNUSED)
   which is define in 'Pintos/lib/syscall-nr.h' */
   uint32_t *p = f->esp;
 
+  //Declare variables
+  int status;
+
   //Switch statement for handling system calls
   switch(*p) {
 
     // Case for System Halt called
     case SYS_HALT:{
       printf("System HALT has been called!\n");
-      shutdown();
+      shutdown_power_off();
       break;
-    }
+}
 
   }
 }

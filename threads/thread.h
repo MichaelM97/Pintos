@@ -97,11 +97,25 @@ struct thread
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
     uint8_t exit_code;                  /* Thread exit code number. */
+    struct process_info *process_info;  /* Metadata for a process */
 #endif
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
   };
+
+/*
+Metadata for process
+Could be retrieved by parent process even after the process exits.
+This is very basic as no info on parent and semephores
+*/
+struct process_info
+  {
+    bool is_alive;			               /* Stores if process is alive */
+    int exit_status;			             /* Stores the exit status */
+    int pid;				                   /* Stores the process ID */
+  };
+
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
