@@ -36,11 +36,34 @@ syscall_handler (struct intr_frame *f UNUSED)
     // Case for System Exit called
     case SYS_EXIT:
       printf("System EXIT has been called!\n");
-      struct thread *current = thread_current();
-      int status = (f->esp - 4);
-      current->process_info->exit_status = status;
+      struct thread *child = thread_current();
+      struct thread *parent = child->parent_thread;
+
+      //Set exit code
+      int exit_code = *((uint32_t*)(f->esp + 4));
+      child->exit_code = exit_code;
+
+      //Retrieve the current child
+      struct list_elem *e;
+      struct child_process *cp = NULL;
+
+      //Set the child process if parent exists
+      if(parent != NULL) {
+        for (e = list_begin (&parent->children); e != list_end (&parent->children);
+           e = list_next (e))
+           {
+          cp = list_entry (e, struct child_process, c_elem);
+          if(cp->pid == child->tid){
+            break;
+          }
+        }
+        //Get exit code from child process
+        if(cp->pid == child->tid && cp != NULL) {
+          cp->return_code = exit_code;
+          sema_up(&cp->alive);
+        }
+      }
       thread_exit();
       break;
-
   }
 }

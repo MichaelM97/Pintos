@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "threads/synch.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -80,6 +81,53 @@ typedef int tid_t;
    only because they are mutually exclusive: only a thread in the
    ready state is on the run queue, whereas only a thread in the
    blocked state is on a semaphore wait list. */
+
+ /*
+   Stores possible enums of load status
+ */
+ enum load_status {
+   LOAD_SUCCESS,
+   LOAD_FAILED
+ };
+
+ /*
+ Metadata for process
+ Could be retrieved by parent process even after the process exits.
+ This is very basic as no info on parent and semephores
+ */
+ struct process_info
+   {
+     bool is_alive;			               /* Stores if process is alive */
+     int exit_status;			             /* Stores the exit status */
+     int pid;				                   /* Stores the process ID */
+   };
+
+ /*
+   Used in thread struct
+   Stores information for list of children
+ */
+ struct child_process {
+   struct semaphore alive; //Used for synchronisation when thread is alive
+   struct semaphore loading; //Used for synchronisation when thread is loading
+   tid_t pid; //Stores the process ID for the child process
+   struct list_elem c_elem; //Used for referencing list of children
+   int return_code; //Stores the return code of the child
+   enum load_status load_status; //Shows if process failed or not
+   bool waiting; //Prevents waiting on the same child twice
+ };
+
+ /*
+   Stores information fo list of files
+ */
+ struct file_info {
+  int fd; //Descriptor ID for the file
+  struct file *fp; //Pointer for the file
+  struct list_elem fpelem; //Used to reference list of files
+ };
+
+/*
+  Thread used by PintOS
+*/
 struct thread
   {
     /* Owned by thread.c. */
@@ -91,7 +139,7 @@ struct thread
     struct list_elem allelem;           /* List element for all threads list. */
 
 
-    // Additional struct declarations
+    /* Additional struct declarations */
     uint8_t exit_code;                  /* Thread exit code number. */
     struct process_info *parent_info;   /* Metadata for a parent process */
     struct list children;               /* Stores list of children processes */
@@ -110,32 +158,6 @@ struct thread
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
   };
-
-/*
-Metadata for process
-Could be retrieved by parent process even after the process exits.
-This is very basic as no info on parent and semephores
-*/
-struct process_info
-  {
-    bool is_alive;			               /* Stores if process is alive */
-    int exit_status;			             /* Stores the exit status */
-    int pid;				                   /* Stores the process ID */
-  };
-
-/*
-  Used in thread struct
-  Stores information for list of children
-*/
-struct child_process {
-  struct semaphore alive; //Used for synchronisation when thread is alive
-  struct semaphore loading; //Used for synchronisation when thread is loading
-  tid_t pid; //Stores the process ID for the child process
-  struct list_elem c_elem; //Used for referencing list of children
-  int return_code; //Stores the return code of the child
-  enum load_status load_status; //Shows if process failed or not
-  bool waiting; //Prevents waiting on the same child twice
-};
 
 
 /* If false (default), use round-robin scheduler.
