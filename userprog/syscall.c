@@ -37,7 +37,7 @@ syscall_handler (struct intr_frame *f UNUSED)
     case SYS_EXIT:
       printf("System EXIT has been called!\n");
       struct thread *current = thread_current();
-      int status = (f->esp + 8);
+      int status = (f->esp - 4);
       current->process_info->exit_status = status;
       thread_exit();
       break;

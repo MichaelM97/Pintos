@@ -208,6 +208,8 @@ thread_create (const char *name, int priority,
 
   /* Add to run queue. */
   thread_unblock (t);
+  t->parent_thread = thread_current();
+
 
   return tid;
 }
@@ -471,6 +473,12 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
+  t->parent_thread = 0; // Initalise parent thread
+
+  // Pass file and children list from Kernel
+  list_init(&t->files);
+  list_init(&t->children);
+
 
   //t->is_kernel = is_kernel;
 

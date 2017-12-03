@@ -90,14 +90,21 @@ struct thread
     int priority;                       /* Priority. */
     struct list_elem allelem;           /* List element for all threads list. */
 
+
+    // Additional struct declarations
+    uint8_t exit_code;                  /* Thread exit code number. */
+    struct process_info *parent_info;   /* Metadata for a parent process */
+    struct list children;               /* Stores list of children processes */
+    struct thread *parent_thread;       /* Stores parent thread */
+    struct list files;                  /* Stores list of files */
+
+
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
-    uint8_t exit_code;                  /* Thread exit code number. */
-    struct process_info *process_info;  /* Metadata for a process */
 #endif
 
     /* Owned by thread.c. */
@@ -115,6 +122,20 @@ struct process_info
     int exit_status;			             /* Stores the exit status */
     int pid;				                   /* Stores the process ID */
   };
+
+/*
+  Used in thread struct
+  Stores information for list of children
+*/
+struct child_process {
+  struct semaphore alive; //Used for synchronisation when thread is alive
+  struct semaphore loading; //Used for synchronisation when thread is loading
+  tid_t pid; //Stores the process ID for the child process
+  struct list_elem c_elem; //Used for referencing list of children
+  int return_code; //Stores the return code of the child
+  enum load_status load_status; //Shows if process failed or not
+  bool waiting; //Prevents waiting on the same child twice
+};
 
 
 /* If false (default), use round-robin scheduler.
