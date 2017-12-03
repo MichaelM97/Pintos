@@ -30,7 +30,9 @@ process_execute (const char *file_name)
 {
   //Declare variables for usage
   char *fn_copy, *save_ptr, *real_name;
-  tid_t tid;
+  tid_t child_id;
+  struct thread *parent_thread = thread_current();
+
 
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
@@ -44,11 +46,34 @@ process_execute (const char *file_name)
   real_name = strtok_r(file_name, " ", &save_ptr);
 
   /* Create a new thread to execute REAL_NAME with arguments. */
-  tid = thread_create (real_name, PRI_DEFAULT, start_process, fn_copy);
+  child_id = thread_create (real_name, PRI_DEFAULT, start_process, fn_copy);
 
-  if (tid == TID_ERROR)
+  if (child_id == TID_ERROR) {
     palloc_free_page (fn_copy);
-  return tid;
+    return child_id;
+  }
+
+  //Allocate size for child processes
+  struct child_process *c = malloc(sizeof(struct child_process));
+  memset (c, 0, sizeof (struct child_process));
+  c->pid = child_id;
+
+  //Initalise semaphores
+  sema_init (&c->loading, 0);
+  sema_init (&c->alive, 0);
+
+  list_push_back(&parent_thread->children, &c->c_elem);
+
+  //Child process loading completed
+  sema_down(&c->loading);
+
+  //Checks if load of child process was successful
+  if (c->load_status == LOAD_FAILED){
+    printf("Loading of child process failed!!\n");
+    return -1;
+  }
+
+  return child_id;
 }
 
 /* A thread function that loads a user process and starts it
@@ -59,6 +84,7 @@ start_process (void *file_name_)
   char *file_name = file_name_;
   struct intr_frame if_;
   bool success;
+  struct thread *child_thread = thread_current();
 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
@@ -67,6 +93,20 @@ start_process (void *file_name_)
   if_.eflags = FLAG_IF | FLAG_MBS;
 
   success = load (file_name, &if_.eip, &if_.esp);
+
+  //Loops through parent child list
+  struct thread *p = child_thread->parent_thread;
+  struct list_elem *e;
+
+  //Sets load status successful if process found
+  for (e = list_begin (&p->children); e != list_end (&p->children);
+       e = list_next (e)) {
+      struct child_process *cp = list_entry (e, struct child_process, c_elem);
+      if(cp->pid == child_thread->tid){
+        cp->load_status = success ? LOAD_SUCCESS:LOAD_FAILED;
+        sema_up(&cp->loading);
+      }
+    }
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
@@ -95,10 +135,49 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid UNUSED)
 {
-    // FIXME: @bgaster --- quick hack to make sure processes execute!
-  for(;;) ;
+    struct thread *p = thread_current();
+    struct list_elem *e;
 
-  return -1;
+    struct child_process *cp = NULL;
+
+    //Retrieve child process
+    for (e = list_begin (&p->children); e != list_end (&p->children);
+       e = list_next (e)) {
+
+      cp = list_entry (e, struct child_process, c_elem);
+
+      if(cp->pid == child_tid){
+        //Check if already waiting on child
+        if(cp->waiting == true) {
+          return -1;
+        }
+        //Set that we are now waiting on the child
+        cp->waiting = true;
+        break;
+      }
+    }
+
+    sema_down(&cp->alive);
+
+    //if child is done, we can return
+    if(cp->load_status == LOAD_FAILED || cp->load_status == LOAD_SUCCESS){
+      if(cp->load_status == LOAD_FAILED) {
+        list_remove(&cp->c_elem);
+      }
+      return cp->return_code;
+    }
+
+    //Checks if we need to wait
+    if(cp != NULL && sema_try_down(&cp->alive) == 0 && cp->pid == child_tid){
+      return -1;
+    }
+
+    //Check if actually a child of the parent
+    if(cp != NULL && cp->pid != child_tid) {
+      return -1;
+    }
+
+    return p->exit_code;
 }
 
 /* Free the current process's resources. */
