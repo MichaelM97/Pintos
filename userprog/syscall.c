@@ -74,6 +74,18 @@ syscall_handler (struct intr_frame *f UNUSED)
 
     //Case for System Wait called
     case SYS_WAIT:{
+      struct thread *child = thread_current();
+      struct thread *parent = child->parent_thread;
+      struct list_elem *e;
+      struct child_process *cp = NULL;
+
+      for (e = list_begin (&parent->children); e != list_end (&parent->children);
+         e = list_next (e))
+         {
+        cp = list_entry (e, struct child_process, c_elem);
+        printf("%d", cp->pid);
+      }
+
       printf("System WAIT has been called!\n");
       f->eax = process_wait(*((uint32_t*)(f->esp + ARG_1)));
       break;

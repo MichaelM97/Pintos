@@ -2,10 +2,9 @@
 #include <syscall.h>
 
 int
-main (void)
+main (int childID)
 {
-
-	wait(121);
+	wait(childID);
     
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
