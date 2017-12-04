@@ -20,9 +20,6 @@ syscall_handler (struct intr_frame *f UNUSED)
   which is define in 'Pintos/lib/syscall-nr.h' */
   uint32_t *p = f->esp;
 
-  //Declare variables
-  //int status;
-
   //Switch statement for handling system calls
   switch(*p) {
 
@@ -34,13 +31,13 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
 
     // Case for System Exit called
-    case SYS_EXIT:
+    case SYS_EXIT:{
       printf("System EXIT has been called!\n");
       struct thread *child = thread_current();
       struct thread *parent = child->parent_thread;
 
       //Set exit code
-      int exit_code = *((uint32_t*)(f->esp + 4));
+      int exit_code = *((uint32_t*)(f->esp + ARG_1));
       child->exit_code = exit_code;
 
       //Retrieve the current child
@@ -65,5 +62,14 @@ syscall_handler (struct intr_frame *f UNUSED)
       }
       thread_exit();
       break;
+    }
+
+    //Case for System Execute Called
+    case SYS_EXEC:{
+      printf("System EXECUTE has been called!\n");
+      //Processes file and chlid ID is returned to file
+      f->eax = process_execute ((char *)*((uint32_t*)(f->esp + ARG_1)));
+      break;
+    }
   }
 }
