@@ -71,5 +71,12 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->eax = process_execute ((char *)*((uint32_t*)(f->esp + ARG_1)));
       break;
     }
+
+    //Case for System Wait called
+    case SYS_WAIT:{
+      printf("System WAIT has been called!\n");
+      f->eax = process_wait(*((uint32_t*)(f->esp + ARG_1)));
+      break;
+    }
   }
 }
