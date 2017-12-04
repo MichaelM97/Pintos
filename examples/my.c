@@ -5,7 +5,7 @@ int
 main (void)
 {
 
-	exec("halt");
+	wait(121);
     
     return EXIT_SUCCESS;
 }

@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <syscall-nr.h>
 #include "devices/shutdown.h" //For shutdown_power_off
-#include "userprog/process.h" //For process_execute
+#include "userprog/process.h" //For process_execute and process_wait
 #include "threads/thread.h" //Retrieve thread and other relevent structs
 
 //Define argument location codes
