@@ -4,7 +4,9 @@
 int
 main (void) 
 {
+	char c;
  	const char *file_name = "SYSCREATE";
-	filesize(open(file_name));
+	int fd = open(file_name);
+	read(fd, &c, filesize(fd));
 
 }

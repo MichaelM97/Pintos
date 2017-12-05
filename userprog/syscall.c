@@ -7,6 +7,7 @@
 
 static void syscall_handler (struct intr_frame *);
 static struct file_info* get_file (int fd);
+static void system_exit (int exit_code);
 
 static struct file_info* get_file (int fd){
   struct thread *cur = thread_current ();
@@ -168,10 +169,39 @@ syscall_handler (struct intr_frame *f UNUSED)
        system_exit(-1);
      }
      //Returns file length
-     unsigned fileLen = file_length (fi->fp);
-     f->eax = fileLen;
-     printf("FILELENGTH = %d\n", (int)fileLen);
+     f->eax = file_length (fi->fp);
      break;
+   }
+
+   //Case for System Read called
+   case SYS_READ:{
+      //Set fd, buffer, and size from arguments
+      int fd = *((uint32_t*)(f->esp + ARG_1));
+      void *buffer = ((uint32_t*)(f->esp + ARG_2));
+      unsigned file_size = *((uint32_t*)(f->esp + ARG_3));
+      struct file_info *fi;
+
+      //Read file from stdin
+      if(fd == STDIN_FILENO) {
+        int i;
+        for(i = 0; i < (int)file_size; i++) {
+        *(uint8_t *)(buffer+i) = input_getc();
+      }
+        f->eax = file_size;
+      }
+      //If fd stdout then exit
+      if(fd == STDOUT_FILENO) {
+        system_exit(-1);
+      }
+      //If file name empty then exit
+      fi = get_file(fd);
+      if (fi == NULL){
+        system_exit(-1);
+      }
+      //Read bytes from file and return them
+      int bytes_read_fr = file_read(fi->fp, buffer, file_size);
+      f->eax = bytes_read_fr;
+      break;
    }
 }
 }
