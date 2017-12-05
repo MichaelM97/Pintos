@@ -153,6 +153,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 
     //Case for System Open called
     case SYS_OPEN: {
+      printf("System OPEN has been called!\n");
       char *files_name = ((char *)*((uint32_t*)(f->esp + ARG_1)));
       int successful = open_file(files_name);
       f->eax = successful;
@@ -162,6 +163,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 
    //Case for System Filesize called
    case SYS_FILESIZE:{
+      printf("System FILESIZE has been called!\n");
      //Gets file info
      struct file_info *fi = get_file ((int)*((uint32_t*)(f->esp + ARG_1)));
      //Exits if file doesnt exist
@@ -175,6 +177,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 
    //Case for System Read called
    case SYS_READ:{
+      printf("System READ has been called!\n");
       //Set fd, buffer, and size from arguments
       int fd = *((uint32_t*)(f->esp + ARG_1));
       void *buffer = ((uint32_t*)(f->esp + ARG_2));
@@ -206,6 +209,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 
    //Case for System Write called
    case SYS_WRITE:{
+      printf("System WRITE has been called!\n");
      //Set fd, buffer, and size from arguments
      int fd = *((uint32_t*)(f->esp + ARG_1));
      const void *buffer = ((uint32_t*)(f->esp + ARG_2));
