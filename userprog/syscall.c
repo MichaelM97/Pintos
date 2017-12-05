@@ -4,7 +4,7 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/init.h"
-
+#include "filesys/filesys.h"
 static void syscall_handler (struct intr_frame *);
 
 void
@@ -79,9 +79,34 @@ syscall_handler (struct intr_frame *f UNUSED)
       break;
     }
     case SYS_OPEN: {
-      char *filesName = ((char *)*((uint32_t*)(f->esp + ARG_1))); //Filename off of stack
-      f->eaz =
+      char *files_name = ((char *)*((uint32_t*)(f->esp + ARG_1))); //Filename off of stack
+      f->eaz = open_file(files_name);
     }
 
+    static int open_file(char*file_name)
+    {
+      struct file* file = filesys_open(file_name);
+      struct thread *cur = thread_current();
+      int file_descriptor;
+
+      if (file == NULL){
+        file_descriptor = -1;
+        return file_descriptor;
+      }
+
+      struct file_size *fi = malloc(sizeof(struct file_info));
+
+      file_descriptor = 2;
+      //0 + 1r STDIN_FILENO and STDOUT_FILENO
+        while(get_file(file_descriptor) != NULL) {
+          file_descriptor++;
+          }
+        //store onto the threads list of files
+        fi->file_descriptor = fd;
+        fi->fp = file;
+        list_push_back(&cur->files, &fi->fpelem);
+
+        return file_descriptor;
+          }
   }
 }
