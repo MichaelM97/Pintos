@@ -7,6 +7,7 @@
 #include "devices/shutdown.h" //For shutdown_power_off
 #include "userprog/process.h" //For process_execute and process_wait
 #include "threads/thread.h" //Retrieve thread and other relevent structs
+#include "filesys/filesys.h" //Allows access to filesys functions
 
 //Define argument location codes
 #define ARG_1 4

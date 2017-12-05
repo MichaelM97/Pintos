@@ -124,5 +124,18 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->eax = open_file(files_name);
     }
 
+    //Case for System Remove called
+    case SYS_REMOVE:{
+      printf("System REMOVE has been called!\n");
+      //Removes file, and returns true if successful
+      bool successful = filesys_remove(
+        (char *)*((uint32_t*)(f->esp + ARG_1)) //File name
+      );
+      f->eax = successful;
+      printf("\nREMOVE WAS %d\n", successful); //Temp line for testing
+      break;
   }
+
+  }
+}
 }

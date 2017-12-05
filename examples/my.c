@@ -1,12 +1,11 @@
-/* Wait for a subprocess to finish. */
-
 #include <stdio.h>
 #include <syscall.h>
-//#include "threads/lib.h"
-//#include "threads/main.h"
 
 int
 main (void) 
 {
-  printf("wait(exec()) = %d", wait (exec ("child-simple")));
+ 	const char *file_name = "SYSCREATE";
+	unsigned file_size = 1000;
+ 	create(file_name, file_size);
+
 }
