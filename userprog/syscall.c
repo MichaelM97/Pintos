@@ -25,6 +25,11 @@ static struct file_info* get_file (int fd){
   return NULL;
 }
 
+static uint32_t fetch_args(struct intr_frame *f, int offset) {
+
+    return *((uint32_t*)(f->esp + offset));
+
+}
 static int open_file(char*file_name)
 {
   struct file* file = filesys_open(file_name);
@@ -232,5 +237,19 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     break;
    }
+  //Case for System Seek
+    case SYS_SEEK:
+    {
+      int arg1 = (int) fetch_args(f,4);
+      unsigned arg2 = (unsigned) fetch_args(f,8);
+
+      struct file_info *fi = get_file(arg1);
+      if (arg1 != NULL)
+      {
+        file_seek(fi->fp,arg2);
+
+      }
+    }
+
 }
 }
