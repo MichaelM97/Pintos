@@ -4,10 +4,8 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/init.h"
-#include "filesys/filesys.h"
 
 static void syscall_handler (struct intr_frame *);
-
 static struct file_info* get_file (int fd){
 
   struct thread *cur = thread_current ();
@@ -48,6 +46,7 @@ static int open_file(char*file_name)
 
     return fd;
       }
+
 void
 syscall_init (void)
 {
@@ -63,6 +62,12 @@ syscall_handler (struct intr_frame *f UNUSED)
 
   //Switch statement for handling system calls
   switch(*p) {
+
+    case SYS_OPEN: {
+     char *files_name = ((char *)*((uint32_t*)(f->esp + ARG_1))); //Filename off of stack
+     f->eax = open_file(files_name);
+     break;
+   }
 
     // Case for System Halt called
     case SYS_HALT:{
@@ -108,7 +113,7 @@ syscall_handler (struct intr_frame *f UNUSED)
     //Case for System Execute Called
     case SYS_EXEC:{
       printf("System EXECUTE has been called!\n");
-      //Processes file and chlid ID is returned to fil
+      //Processes file and chlid ID is returned to file
       f->eax = process_execute ((char *)*((uint32_t*)(f->esp + ARG_1)));
       break;
     }
@@ -119,9 +124,17 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->eax = process_wait(*((uint32_t*)(f->esp + ARG_1)));
       break;
     }
-    case SYS_OPEN: {
-      char *files_name = ((char *)*((uint32_t*)(f->esp + ARG_1))); //Filename off of stack
-      f->eax = open_file(files_name);
+
+    //Case for System Create called
+    case SYS_CREATE:{
+      printf("System CREATE has been called!\n");
+      //Creates file, and returns true if successful
+      bool successful = filesys_create(
+        (char *)*((uint32_t*)(f->esp + ARG_1)) //File Name
+        , (unsigned)*((uint32_t*)(f->esp + ARG_2))); //File Size
+      f->eax = successful;
+      printf("\nCREATE WAS %d\n", successful); //Temp line for testing
+      break;
     }
 
     //Case for System Remove called
@@ -134,8 +147,6 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->eax = successful;
       printf("\nREMOVE WAS %d\n", successful); //Temp line for testing
       break;
-  }
-
   }
 }
 }
