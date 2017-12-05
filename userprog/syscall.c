@@ -6,6 +6,46 @@
 #include "threads/init.h"
 
 static void syscall_handler (struct intr_frame *);
+static struct file_info* get_file (int fd){
+
+  struct thread *cur = thread_current ();
+  struct list_elem *e;
+  struct file_info *fi;
+
+  for(e = list_begin(&cur->files); e != list_end(&cur->files); e = list_next(e)){
+    fi = list_entry(e, struct file_info, fpelem);
+
+    if(fi->fd == fd) {
+      return fi;
+    }
+  }
+
+  return NULL;
+}
+static int open_file(char*file_name)
+{
+  struct file* file = filesys_open(file_name);
+  struct thread *cur = thread_current();
+  int fd;
+
+  if (file == NULL){
+    fd = -1;
+    return fd;
+  }
+
+  struct file_info *fi = malloc(sizeof(struct file_info));
+
+  fd = 2;
+  //0 + 1 are for STDIN_FILENO + STDOUT_FILENO
+    while(get_file(fd) != NULL) {
+      fd++;
+      }
+    fi->fd = fd;
+    fi->fp = file;
+    list_push_back(&cur->files, &fi->fpelem);
+
+    return fd;
+      }
 
 void
 syscall_init (void)
@@ -22,6 +62,12 @@ syscall_handler (struct intr_frame *f UNUSED)
 
   //Switch statement for handling system calls
   switch(*p) {
+
+    case SYS_OPEN: {
+     char *files_name = ((char *)*((uint32_t*)(f->esp + ARG_1))); //Filename off of stack
+     f->eax = open_file(files_name);
+     break;
+   }
 
     // Case for System Halt called
     case SYS_HALT:{
