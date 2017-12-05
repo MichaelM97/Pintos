@@ -11,5 +11,6 @@ write(fd, "e", 100);
 write(fd, "l", 100);
 write(fd, "l", 100);
 write(fd, "o", 100);
+tell(fd);
 
 }

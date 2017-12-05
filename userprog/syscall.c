@@ -232,5 +232,20 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     break;
    }
+
+   //Case for System Tell called
+   case SYS_TELL:{
+      struct file_info *fi = get_file((int)*((uint32_t*)(f->esp + ARG_1)));
+      //Return position of next byte to be read
+      if(fi != NULL) {
+         unsigned result = file_tell (fi->fp);
+         printf("NEXT BYTE TO BE WRITTEN/READ = %d\n", result);
+         f->eax = result;
+      }
+      else {
+        f->eax = 0;
+      }
+     break;
+   }
 }
 }
