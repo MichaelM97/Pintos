@@ -183,7 +183,7 @@ syscall_handler (struct intr_frame *f UNUSED)
       void *buffer = ((uint32_t*)(f->esp + ARG_2));
       unsigned file_size = *((uint32_t*)(f->esp + ARG_3));
       struct file_info *fi;
-
+      printf("%c\n",&buffer );
       //Read file from stdin
       if(fd == STDIN_FILENO) {
         int i;

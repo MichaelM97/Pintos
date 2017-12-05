@@ -6,6 +6,10 @@ main (void)
 {
  	const char *file_name = "SYSCREATE";
 	int fd = open(file_name);
-	write(fd, "HelloWRITE", 100);	
+	write(fd, "Y", 100);	
+write(fd, "e", 100);
+write(fd, "l", 100);
+write(fd, "l", 100);
+write(fd, "o", 100);
 
 }
