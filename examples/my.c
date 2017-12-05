@@ -1,12 +1,11 @@
-/* Wait for a subprocess to finish. */
-
 #include <stdio.h>
 #include <syscall.h>
 
 int
 main (void) 
 {
- 	const char *file_name = "SYSCREATEFileName";
-	int file_size = 2;
+ 	const char *file_name = "SYSCREATE";
+	unsigned file_size = 1000;
  	create(file_name, file_size);
+
 }
