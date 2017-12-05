@@ -5,5 +5,6 @@ int
 main (void) 
 {
  	const char *file_name = "SYSCREATE";
-	open(file_name);
+	filesize(open(file_name));
+
 }
