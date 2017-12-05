@@ -51,6 +51,36 @@ static int open_file(char*file_name)
   return fd;
 }
 
+static void system_exit (int exit_code) {
+  struct thread *child = thread_current();
+  struct thread *parent = child->parent_thread;
+
+  //Set exit code
+  child->exit_code = exit_code;
+
+  //Retrieve the current child
+  struct list_elem *e;
+  struct child_process *cp = NULL;
+
+  //Set the child process if parent exists
+  if(parent != NULL) {
+    for (e = list_begin (&parent->children); e != list_end (&parent->children);
+       e = list_next (e))
+       {
+      cp = list_entry (e, struct child_process, c_elem);
+      if(cp->pid == child->tid){
+        break;
+      }
+    }
+    //Get exit code from child process
+    if(cp->pid == child->tid && cp != NULL) {
+      cp->return_code = exit_code;
+      sema_up(&cp->alive);
+    }
+  }
+  thread_exit();
+}
+
 void
 syscall_init (void)
 {
@@ -77,34 +107,7 @@ syscall_handler (struct intr_frame *f UNUSED)
     // Case for System Exit called
     case SYS_EXIT:{
       printf("System EXIT has been called!\n");
-      struct thread *child = thread_current();
-      struct thread *parent = child->parent_thread;
-
-      //Set exit code
-      int exit_code = *((uint32_t*)(f->esp + ARG_1));
-      child->exit_code = exit_code;
-
-      //Retrieve the current child
-      struct list_elem *e;
-      struct child_process *cp = NULL;
-
-      //Set the child process if parent exists
-      if(parent != NULL) {
-        for (e = list_begin (&parent->children); e != list_end (&parent->children);
-           e = list_next (e))
-           {
-          cp = list_entry (e, struct child_process, c_elem);
-          if(cp->pid == child->tid){
-            break;
-          }
-        }
-        //Get exit code from child process
-        if(cp->pid == child->tid && cp != NULL) {
-          cp->return_code = exit_code;
-          sema_up(&cp->alive);
-        }
-      }
-      thread_exit();
+      system_exit((int)*((uint32_t*)(f->esp + ARG_1)));
       break;
     }
 
@@ -154,6 +157,21 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->eax = successful;
       printf("\nOPEN WAS %d\n", successful); //Temp line for testing
       break;
+   }
+
+   //Case for System Filesize called
+   case SYS_FILESIZE:{
+     //Gets file info
+     struct file_info *fi = get_file ((int)*((uint32_t*)(f->esp + ARG_1)));
+     //Exits if file doesnt exist
+     if (fi == NULL) {
+       system_exit(-1);
+     }
+     //Returns file length
+     unsigned fileLen = file_length (fi->fp);
+     f->eax = fileLen;
+     printf("FILELENGTH = %d\n", (int)fileLen);
+     break;
    }
 }
 }
