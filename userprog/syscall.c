@@ -67,7 +67,7 @@ syscall_handler (struct intr_frame *f UNUSED)
     //Case for System Execute Called
     case SYS_EXEC:{
       printf("System EXECUTE has been called!\n");
-      //Processes file and chlid ID is returned to file
+      //Processes file and chlid ID is returned to fil
       f->eax = process_execute ((char *)*((uint32_t*)(f->esp + ARG_1)));
       break;
     }
@@ -78,5 +78,10 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->eax = process_wait(*((uint32_t*)(f->esp + ARG_1)));
       break;
     }
+    case SYS_OPEN: {
+      char *filesName = ((char *)*((uint32_t*)(f->esp + ARG_1))); //Filename off of stack
+      f->eaz =
+    }
+
   }
 }
