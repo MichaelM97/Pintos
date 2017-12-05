@@ -240,15 +240,17 @@ syscall_handler (struct intr_frame *f UNUSED)
   //Case for System Seek
     case SYS_SEEK:
     {
-      int arg1 = (int) fetch_args(f,4);
-      unsigned arg2 = (unsigned) fetch_args(f,8);
+      int arg1 = (int) fetch_args(f,ARG_1);
+      unsigned arg2 = (unsigned) fetch_args(f,ARG_2);
 
       struct file_info *fi = get_file(arg1);
       if (arg1 != NULL)
       {
         file_seek(fi->fp,arg2);
 
-      }
+        }
+
+      break;
     }
 
 }
