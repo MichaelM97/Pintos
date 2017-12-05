@@ -2,13 +2,8 @@
 #include <syscall.h>
 
 int
-main (int argc, char **argv)
+main (void) 
 {
-    int i,j;
-
-  for (i = 0; i < argc; i++)
-    printf ("%s ", argv[i]);
-  printf ("\n");
-
-  return EXIT_SUCCESS;
+ 	const char *file_name = "SYSCREATE";
+	open(file_name);
 }
