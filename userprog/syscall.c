@@ -78,5 +78,17 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->eax = process_wait(*((uint32_t*)(f->esp + ARG_1)));
       break;
     }
+
+    //Case for System Create called
+    case SYS_CREATE:{
+      printf("System CREATE has been called!\n");
+      //Creates file, and checks if successful
+      bool successful = filesys_create(
+        (char *)*((uint32_t*)(f->esp + ARG_1)) //File name
+        , (unsigned)*((uint32_t*)(f->esp + ARG_2)) //File size
+      );
+      f->eax = successful;
+      break;
+    }
   }
 }
