@@ -7,6 +7,7 @@
 
 static void syscall_handler (struct intr_frame *);
 static struct file_info* get_file (int fd);
+static void system_exit (int exit_code);
 
 static struct file_info* get_file (int fd){
   struct thread *cur = thread_current ();
@@ -152,6 +153,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 
     //Case for System Open called
     case SYS_OPEN: {
+      printf("System OPEN has been called!\n");
       char *files_name = ((char *)*((uint32_t*)(f->esp + ARG_1)));
       int successful = open_file(files_name);
       f->eax = successful;
@@ -161,6 +163,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 
    //Case for System Filesize called
    case SYS_FILESIZE:{
+      printf("System FILESIZE has been called!\n");
      //Gets file info
      struct file_info *fi = get_file ((int)*((uint32_t*)(f->esp + ARG_1)));
      //Exits if file doesnt exist
@@ -168,10 +171,66 @@ syscall_handler (struct intr_frame *f UNUSED)
        system_exit(-1);
      }
      //Returns file length
-     unsigned fileLen = file_length (fi->fp);
-     f->eax = fileLen;
-     printf("FILELENGTH = %d\n", (int)fileLen);
+     f->eax = file_length (fi->fp);
      break;
+   }
+
+   //Case for System Read called
+   case SYS_READ:{
+      printf("System READ has been called!\n");
+      //Set fd, buffer, and size from arguments
+      int fd = *((uint32_t*)(f->esp + ARG_1));
+      void *buffer = ((uint32_t*)(f->esp + ARG_2));
+      unsigned file_size = *((uint32_t*)(f->esp + ARG_3));
+      struct file_info *fi;
+      //Read file from stdin
+      if(fd == STDIN_FILENO) {
+        int i;
+        for(i = 0; i < (int)file_size; i++) {
+        *(uint8_t *)(buffer+i) = input_getc();
+      }
+        f->eax = file_size;
+      }
+      //If fd stdout then exit
+      if(fd == STDOUT_FILENO) {
+        system_exit(-1);
+      }
+      //If file name empty then exit
+      fi = get_file(fd);
+      if (fi == NULL){
+        system_exit(-1);
+      }
+      //Read bytes from file and return them
+      int bytes_read_fr = file_read(fi->fp, buffer, file_size);
+      f->eax = bytes_read_fr;
+      printf("BYTES READ = %d", bytes_read_fr);
+      break;
+   }
+
+   //Case for System Write called
+   case SYS_WRITE:{
+      printf("System WRITE has been called!\n");
+     //Set fd, buffer, and size from arguments
+     int fd = *((uint32_t*)(f->esp + ARG_1));
+     const void *buffer = ((uint32_t*)(f->esp + ARG_2));
+     unsigned int file_length = *((uint32_t*)(f->esp + ARG_3));
+
+     //If fd is 1, write to the console and return file length
+     if(fd == 1) {
+      putbuf((const char *)buffer, (size_t) file_length);
+      f->eax = file_length;
+      }
+     else {
+      struct file_info *fi = get_file(fd);
+      if(fi != NULL) {
+        //Returns number of bytes written
+        f->eax = file_write (fi->fp, buffer, file_length);
+      }
+      else {
+        f->eax = 0;
+      }
+    }
+    break;
    }
 }
 }
