@@ -2,11 +2,11 @@
 
 #include <stdio.h>
 #include <syscall.h>
-//#include "threads/lib.h"
-//#include "threads/main.h"
 
 int
 main (void) 
 {
-  printf("wait(exec()) = %d", wait (exec ("child-simple")));
+ 	const char *file_name = "SYSCREATEFileName";
+	int file_size = 2;
+ 	create(file_name, file_size);
 }
