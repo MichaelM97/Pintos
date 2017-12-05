@@ -97,12 +97,11 @@ syscall_handler (struct intr_frame *f UNUSED)
       struct file_size *fi = malloc(sizeof(struct file_info));
 
       file_descriptor = 2;
-      //0 + 1r STDIN_FILENO and STDOUT_FILENO
+      //0 + 1 are for STDIN_FILENO + STDOUT_FILENO
         while(get_file(file_descriptor) != NULL) {
           file_descriptor++;
           }
-        //store onto the threads list of files
-        fi->file_descriptor = fd;
+        fi->file_descriptor = file_descriptor;
         fi->fp = file;
         list_push_back(&cur->files, &fi->fpelem);
 
