@@ -203,5 +203,30 @@ syscall_handler (struct intr_frame *f UNUSED)
       f->eax = bytes_read_fr;
       break;
    }
+
+   //Case for System Write called
+   case SYS_WRITE:{
+     //Set fd, buffer, and size from arguments
+     int fd = *((uint32_t*)(f->esp + ARG_1));
+     const void *buffer = ((uint32_t*)(f->esp + ARG_2));
+     unsigned int file_length = *((uint32_t*)(f->esp + ARG_3));
+
+     //If fd is 1, write to the console and return file length
+     if(fd == 1) {
+      putbuf((const char *)buffer, (size_t) file_length);
+      f->eax = file_length;
+      }
+     else {
+      struct file_info *fi = get_file(fd);
+      if(fi != NULL) {
+        //Returns number of bytes written
+        f->eax = file_write (fi->fp, buffer, file_length);
+      }
+      else {
+        f->eax = 0;
+      }
+    }
+    break;
+   }
 }
 }
