@@ -183,7 +183,6 @@ syscall_handler (struct intr_frame *f UNUSED)
       void *buffer = ((uint32_t*)(f->esp + ARG_2));
       unsigned file_size = *((uint32_t*)(f->esp + ARG_3));
       struct file_info *fi;
-      printf("%c\n",&buffer );
       //Read file from stdin
       if(fd == STDIN_FILENO) {
         int i;
@@ -204,6 +203,7 @@ syscall_handler (struct intr_frame *f UNUSED)
       //Read bytes from file and return them
       int bytes_read_fr = file_read(fi->fp, buffer, file_size);
       f->eax = bytes_read_fr;
+      printf("BYTES READ = %d", bytes_read_fr);
       break;
    }
 
