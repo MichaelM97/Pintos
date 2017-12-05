@@ -15,5 +15,5 @@
 
 //Function prototypes
 void syscall_init (void);
-
+static struct file_info* get_file (int fd);
 #endif /* userprog/syscall.h */
