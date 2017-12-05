@@ -5,8 +5,25 @@
 #include "threads/thread.h"
 #include "threads/init.h"
 #include "filesys/filesys.h"
+
 static void syscall_handler (struct intr_frame *);
 
+static struct file_info* get_file (int fd){
+
+  struct thread *cur = thread_current ();
+  struct list_elem *e;
+  struct file_info *fi;
+
+  for(e = list_begin(&cur->files); e != list_end(&cur->files); e = list_next(e)){
+    fi = list_entry(e, struct file_info, fpelem);
+
+    if(fi->fd == fd) {
+      return fi;
+    }
+  }
+
+  return NULL;
+}
 static int open_file(char*file_name)
 {
   struct file* file = filesys_open(file_name);
@@ -14,11 +31,11 @@ static int open_file(char*file_name)
   int fd;
 
   if (file == NULL){
-    file_descriptor = -1;
-    return file_descriptor;
+    fd = -1;
+    return fd;
   }
 
-  struct file_size *fi = malloc(sizeof(struct file_info));
+  struct file_info *fi = malloc(sizeof(struct file_info));
 
   fd = 2;
   //0 + 1 are for STDIN_FILENO + STDOUT_FILENO
@@ -104,7 +121,7 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
     case SYS_OPEN: {
       char *files_name = ((char *)*((uint32_t*)(f->esp + ARG_1))); //Filename off of stack
-      f->eaz = open_file(files_name);
+      f->eax = open_file(files_name);
     }
 
   }
