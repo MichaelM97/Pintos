@@ -82,13 +82,25 @@ syscall_handler (struct intr_frame *f UNUSED)
     //Case for System Create called
     case SYS_CREATE:{
       printf("System CREATE has been called!\n");
-      //Creates file, and checks if successful
+      //Creates file, and returns true if successful
       bool successful = filesys_create(
-        (char *)*((uint32_t*)(f->esp + ARG_1)) //File name
-        , (unsigned)*((uint32_t*)(f->esp + ARG_2)) //File size
-      );
+        (char *)*((uint32_t*)(f->esp + ARG_1)) //File Name
+        , (unsigned)*((uint32_t*)(f->esp + ARG_2))); //File Size
       f->eax = successful;
+      printf("\nCREATE WAS %d\n", successful); //Temp line for testing
       break;
     }
+
+    //Case for System Remove called
+    case SYS_REMOVE:{
+      printf("System REMOVE has been called!\n");
+      //Removes file, and returns true if successful
+      bool successful = filesys_remove(
+        (char *)*((uint32_t*)(f->esp + ARG_1)) //File name
+      );
+      f->eax = successful;
+      printf("\nREMOVE WAS %d\n", successful); //Temp line for testing
+      break;
   }
+}
 }
