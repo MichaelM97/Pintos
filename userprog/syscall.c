@@ -244,9 +244,7 @@ syscall_handler (struct intr_frame *f UNUSED)
       struct file_info *fi = get_file((int)*((uint32_t*)(f->esp + ARG_1)));
       //Return position of next byte to be read
       if(fi != NULL) {
-         unsigned result = file_tell (fi->fp);
-         printf("NEXT BYTE TO BE WRITTEN/READ = %d\n", result);
-         f->eax = result;
+         f->eax = file_tell (fi->fp);
       }
       else {
         f->eax = 0;
@@ -273,7 +271,7 @@ syscall_handler (struct intr_frame *f UNUSED)
      //Case for System Close
      case SYS_CLOSE:
      {
-
+     printf("System CLOSE has been called!\n");
      int argu = ((int)fetch_args(f,ARG_1));
 
      struct file_info *fi;
@@ -284,12 +282,7 @@ syscall_handler (struct intr_frame *f UNUSED)
        free(fi);
 
      }
-
      break;
    }
-
-
    }
-
-
 }

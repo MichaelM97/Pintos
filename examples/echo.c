@@ -6,8 +6,7 @@ main (void)
 {
  	const char *file_name = "SYSCREATE";
 	int fd = open(file_name);
-	write(fd, "Y", 100);	
-seek(fd, 56);
-tell(fd);
-
+	open(file_name);
+	close(fd);
+	open(file_name);
 }
