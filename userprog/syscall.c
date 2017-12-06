@@ -244,9 +244,7 @@ syscall_handler (struct intr_frame *f UNUSED)
       struct file_info *fi = get_file((int)*((uint32_t*)(f->esp + ARG_1)));
       //Return position of next byte to be read
       if(fi != NULL) {
-         unsigned result = file_tell (fi->fp);
-         printf("NEXT BYTE TO BE WRITTEN/READ = %d\n", result);
-         f->eax = result;
+         f->eax = file_tell (fi->fp);
       }
       else {
         f->eax = 0;
@@ -256,8 +254,9 @@ syscall_handler (struct intr_frame *f UNUSED)
 
    //Case for System Seek
      case SYS_SEEK:
-     printf("System SEEK has been called!\n");
      {
+     printf("System SEEK has been called!\n");
+
        int arg1 = (int) fetch_args(f,ARG_1);
        unsigned arg2 = (unsigned) fetch_args(f,ARG_2);
 
@@ -266,7 +265,24 @@ syscall_handler (struct intr_frame *f UNUSED)
        {
          file_seek(fi->fp,arg2);
        }
-       break;
+      break;
+   }
+
+     //Case for System Close
+     case SYS_CLOSE:
+     {
+     printf("System CLOSE has been called!\n");
+     int argu = ((int)fetch_args(f,ARG_1));
+
+     struct file_info *fi;
+     fi = get_file(argu);
+     if (fi != NULL) {
+       file_close(fi->fp);
+       list_remove(&fi->fpelem);
+       free(fi);
+
      }
-}
+     break;
+   }
+   }
 }
