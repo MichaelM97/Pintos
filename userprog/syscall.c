@@ -127,27 +127,27 @@ syscall_handler (struct intr_frame *f UNUSED)
     }
 
     case SYS_EXIT:{
-      system_exit((int)*((uint32_t*)(f->esp + ARG_1)));
+      system_exit((int)fetch_args(f,ARG_1));
       break;
     }
 
     case SYS_EXEC:{
       //Processes file and chlid ID is returned to file
-      f->eax = process_execute ((char *)*((uint32_t*)(f->esp + ARG_1)));
+      f->eax = process_execute ((char *)fetch_args(f,ARG_1));
       break;
     }
 
     case SYS_WAIT:{
       //Process wait and return if successful
-      f->eax = process_wait(*((uint32_t*)(f->esp + ARG_1)));
+      f->eax = process_wait(fetch_args(f,ARG_1));
       break;
     }
 
     case SYS_CREATE:{
       //Creates file, and returns true if successful
       f->eax = filesys_create(
-        (char *)*((uint32_t*)(f->esp + ARG_1)), //File Name
-        (unsigned)*((uint32_t*)(f->esp + ARG_2)) //File Size
+        (char *)fetch_args(f,ARG_1), //File Name
+        (unsigned)fetch_args(f,ARG_2) //File Size
       );
       break;
     }
@@ -155,20 +155,20 @@ syscall_handler (struct intr_frame *f UNUSED)
     case SYS_REMOVE:{
       //Removes file, and returns true if successful
       f->eax  = filesys_remove(
-        (char *)*((uint32_t*)(f->esp + ARG_1)) //File name
+        (char *)fetch_args(f,ARG_1) //File name
       );
       break;
     }
 
     case SYS_OPEN:{
       //Opens file, returns file descriptor (or -1 if unsuccessful)
-      char *files_name = ((char *)*((uint32_t*)(f->esp + ARG_1)));
+      char *files_name = ((char *)fetch_args(f,ARG_1));
       f->eax = open_file(files_name);
       break;
     }
 
     case SYS_FILESIZE:{
-      struct file_info *fi = get_file ((int)*((uint32_t*)(f->esp + ARG_1)));
+      struct file_info *fi = get_file((int)fetch_args(f,ARG_1));
       //Exits if file doesnt exist
       if (fi == NULL) {
         system_exit(-1);
@@ -180,9 +180,9 @@ syscall_handler (struct intr_frame *f UNUSED)
 
     case SYS_READ:{
       //Set file descriptor, buffer, and size from arguments
-      int fd = *((uint32_t*)(f->esp + ARG_1));
-      void *buffer = ((uint32_t*)(f->esp + ARG_2));
-      unsigned file_size = *((uint32_t*)(f->esp + ARG_3));
+      int fd = fetch_args(f,ARG_1);
+      void *buffer = fetch_args(f,ARG_2);
+      unsigned file_size = fetch_args(f,ARG_3);
       struct file_info *fi;
       //Read from stdin (if that is buffer location)
       if(fd == STDIN_FILENO) {
@@ -207,9 +207,9 @@ syscall_handler (struct intr_frame *f UNUSED)
 
     case SYS_WRITE:{
       //Set file descriptor, buffer, and size from arguments
-      int fd = *((uint32_t*)(f->esp + ARG_1));
-      const void *buffer = ((uint32_t*)(f->esp + ARG_2));
-      unsigned int file_length = *((uint32_t*)(f->esp + ARG_3));
+      int fd = fetch_args(f,ARG_1);
+      const void *buffer = fetch_args(f,ARG_2);
+      unsigned int file_length = fetch_args(f,ARG_3);
 
       if(fd == 1) { //Write to the console and return file length
       putbuf((const char *)buffer, (size_t) file_length);
@@ -229,7 +229,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 
     case SYS_TELL:{
       //Return position of next byte to be read
-      struct file_info *fi = get_file((int)*((uint32_t*)(f->esp + ARG_1)));
+      struct file_info *fi = get_file((int)fetch_args(f,ARG_1));
       if(fi != NULL) {
          f->eax = file_tell (fi->fp);
       }
