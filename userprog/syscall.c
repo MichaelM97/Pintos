@@ -270,10 +270,11 @@ syscall_handler (struct intr_frame *f UNUSED)
       break;
    }
 
-     //Case for SYstem Close
+     //Case for System Close
      case SYS_CLOSE:
      {
-     int argu = ((int)load_stack(f,ARG_1));
+
+     int argu = ((int)fetch_args(f,ARG_1));
 
      struct file_info *fi;
      fi = get_file(argu);
@@ -283,6 +284,7 @@ syscall_handler (struct intr_frame *f UNUSED)
        free(fi);
 
      }
+
      break;
    }
 
