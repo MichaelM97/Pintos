@@ -256,8 +256,9 @@ syscall_handler (struct intr_frame *f UNUSED)
 
    //Case for System Seek
      case SYS_SEEK:
-     printf("System SEEK has been called!\n");
      {
+     printf("System SEEK has been called!\n");
+
        int arg1 = (int) fetch_args(f,ARG_1);
        unsigned arg2 = (unsigned) fetch_args(f,ARG_2);
 
@@ -266,7 +267,27 @@ syscall_handler (struct intr_frame *f UNUSED)
        {
          file_seek(fi->fp,arg2);
        }
-       break;
+      break;
+   }
+
+     //Case for SYstem Close
+     case SYS_CLOSE:
+     {
+     int argu = ((int)load_stack(f,ARG_1));
+
+     struct file_info *fi;
+     fi = get_file(argu);
+     if (fi != NULL) {
+       file_close(fi->fp);
+       list_remove(&fi->fpelem);
+       free(fi);
+
      }
-}
+     break;
+   }
+
+
+   }
+
+
 }
