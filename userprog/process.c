@@ -33,7 +33,6 @@ process_execute (const char *file_name)
   tid_t child_id;
   struct thread *parent_thread = thread_current();
 
-
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
@@ -41,13 +40,14 @@ process_execute (const char *file_name)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
 
-  /*Seperate file name by white space, in order to
-  obtain process name and arguments seperatley*/
+  /* Seperate file name by white space, in order to
+  obtain process name and arguments seperatley */
   real_name = strtok_r(file_name, " ", &save_ptr);
 
-  /* Create a new thread to execute REAL_NAME with arguments. */
+  /* Create a new child thread to execute REAL_NAME with arguments */
   child_id = thread_create (real_name, PRI_DEFAULT, start_process, fn_copy);
 
+  //If thread ID error with child ID
   if (child_id == TID_ERROR) {
     palloc_free_page (fn_copy);
     return child_id;
