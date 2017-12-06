@@ -8,6 +8,7 @@
 /* Function prototypes */
 static void syscall_handler (struct intr_frame *);
 static struct file_info* get_file (int fd);
+static int open_file(char *file_name);
 static void system_exit (int exit_code);
 
 /* Finds file in thread list and return its information */
@@ -103,7 +104,7 @@ static void system_exit (int exit_code) {
   thread_exit();
 }
 
-/* Initalises the stack */
+/* Initalises the syscall_handler */
 void
 syscall_init (void)
 {
